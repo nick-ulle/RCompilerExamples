@@ -1,0 +1,14 @@
+Package: RCompilerExamples
+Title: Examples for RLLVMCompile
+Version: 0.1.0
+Authors@R: c(
+  person("Nick", "Ulle", email = "nick.ulle@gmail.com", role = "cre"))
+Description: Case studies for using RLLVMCompile in statistical applications.
+Depends: R (>= 3.2.1)
+License: MIT + file LICENSE
+LazyData: true
+Imports:
+  Rllvm,
+  RLLVMCompile
+Suggests:
+  testthat
