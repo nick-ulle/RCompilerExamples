@@ -1,6 +1,10 @@
 # Description:
 #   Example of a distance function.
 
+#' @import Rllvm
+#' @import RLLVMCompile
+NULL
+
 # TODO:
 #   * Map math functions to calls in libm (we already do for `pow`).
 #   * Automatically get vector lengths.
@@ -8,13 +12,12 @@
 # FIXME: Compiler should translate abs() -> fabs().
 fabs = abs
 
-
+#' Compile the functions for the distance example.
+#'
+#' @param module an existing LLVM module to use for compilation, optional
+#' @return An LLVM module containing the compiled functions.
+#' @export
 compile_distance = function(module = Module())
-  #' Compile the functions for the distance example.
-  #'
-  #' @param module an existing LLVM module to use for compilation, optional
-  #' @return An LLVM module containing the compiled functions.
-  #' @export
 {
   # Minkowski function.
   param_types = list(DoublePtrType, DoublePtrType, Int32Type, DoubleType)
@@ -35,13 +38,14 @@ compile_distance = function(module = Module())
 }
 
 
+#' Compute the Minkowski distance between two vectors.
+#'
+#' @name minkowski
+#' @param x numeric, first vector
+#' @param y numeric, second vector
+#' @param len integer, length of x and y
+#' @param p numeric, Minkowski parameter (e.g., 2 gives Euclidean distance)
 .minkowski = function(x, y, len, p)
-  #' Compute the Minkowski distance between two vectors.
-  #'
-  #' @param x numeric, first vector
-  #' @param y numeric, second vector
-  #' @param len integer, length of x and y
-  #' @param p numeric, Minkowski parameter (e.g., 2 gives Euclidean distance)
 {
   # FIXME: Unless we assign a non-integer value first, the compiler will mark
   # `result` as an integer.
@@ -57,18 +61,19 @@ compile_distance = function(module = Module())
 }
 
 
+#' Compute distances from columns of x to columns of y.
+#'
+#' This version is non-idiomatic to suit the compiler's quirks, and should
+#' not be called directly in the R interpreter.
+#'
+#' @name distance
+#' @param x numeric, first matrix
+#' @param y numeric, second matrix
+#' @param nrow integer, number of rows in x (or y)
+#' @param ncol_x integer, number of columns in x
+#' @param ncol_y integer, number of columns in y
+#' @param p numeric, Minkowski parameter (e.g., 2 gives Euclidean distance)
 .distance = function(x, y, nrow, ncol_x, ncol_y, p)
-  #' Compute distances from columns of x to columns of y.
-  #'
-  #' This version is non-idiomatic to suit the compiler's quirks, and should
-  #' not be called directly in the R interpreter.
-  #'
-  #' @param x numeric, first matrix
-  #' @param y numeric, second matrix
-  #' @param nrow integer, number of rows in x (or y)
-  #' @param ncol_x integer, number of columns in x
-  #' @param ncol_y integer, number of columns in y
-  #' @param p numeric, Minkowski parameter (e.g., 2 gives Euclidean distance)
 {
   # Allocate a vector. Use column-major order.
   distances = numeric(ncol_x * ncol_y)
